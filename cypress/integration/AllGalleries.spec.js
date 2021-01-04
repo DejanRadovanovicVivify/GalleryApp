@@ -1,12 +1,12 @@
 /// <reference types="Cypress" />
 
-import { email, password, title, title1, description, description1} from '../fixtures/variables'
-import { comment, image1, image2, token, galleryID, commentID } from '../fixtures/variables'
+import { email, password, title, description, image1} from '../fixtures/variables'
 
 describe('Testing Backend', () => {
 
     let token;
     let galleryID;
+    let myGallery;
 
     it('Login Backend', () => {
         cy.request({
@@ -20,7 +20,6 @@ describe('Testing Backend', () => {
             expect(resp.status).to.eq(200);
             expect(resp.body).to.have.property('access_token');
             expect(resp.body).to.have.property('token_type').and.to.eq('bearer')
-            //localStorage.setItem('token', resp.body.access_token);
             token = resp.body.access_token;
         })
     })
@@ -45,7 +44,7 @@ describe('Testing Backend', () => {
         })
     })
 
-    it.only('Finding my gallery in all galleries', () => {
+    it('Finding my gallery in all galleries', () => {
         cy.request({
             method: 'GET',
             url: '/galleries?page=1&term=',
@@ -55,23 +54,24 @@ describe('Testing Backend', () => {
         }).then((resp) => {
             expect(resp.status).to.eq(200);
             expect(resp.body).to.have.property('galleries')
+            resp.body.galleries.forEach(gallery => {
+                if(gallery.title === title){
+                    myGallery = gallery.title;
+                }
+            });
         })
     })
 
-    // it('Finding my gallery in all galleries', () => {
-    //     cy.request
-    // })
-
-    // it('Delete Gallery', () => {
-    //     cy.request({
-    //         method: 'DELETE',
-    //         url: `https://gallery-api.vivifyideas.com/api/galleries/${galleryID}`,
-    //         headers: {
-    //             authorization: `Bearer ${token}`
-    //         }
-    //     }).then((resp) => {
-    //         expect(resp.status).to.eq(200);
-    //     })
-    // })
+    it('Delete Gallery', () => {
+        cy.request({
+            method: 'DELETE',
+            url: `https://gallery-api.vivifyideas.com/api/galleries/${galleryID}`,
+            headers: {
+                authorization: `Bearer ${token}`
+            }
+        }).then((resp) => {
+            expect(resp.status).to.eq(200);
+        })
+    })
 
 })
